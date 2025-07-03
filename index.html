@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Playlist</title>
+    <style>
+        /* Estilos gerais com o tema roxo e turquesa */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #4e7c84;
+            color: #333;
+        }
+        
+        h1 {
+            color: #6a3093; /* Roxo */
+            text-align: center;
+        }
+        
+        .container {
+            background-color: rgb(255, 255, 255);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #6a3093; /* Roxo */
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #52918e; /* Turquesa */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3abab5; /* Turquesa mais escuro */
+        }
+        
+        .playlist {
+            margin-top: 30px;
+        }
+        
+        .playlist h2 {
+            color: #6a3093; /* Roxo */
+            border-bottom: 2px solid #48d1cc; /* Turquesa */
+            padding-bottom: 5px;
+        }
+        
+        .music-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .music-item:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        
+        .delete-btn {
+            background-color: #ff6b6b;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .delete-btn:hover {
+            background-color: #ff5252;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Minha Playlist</h1>
+        
+        <!-- Formulário para adicionar novas músicas -->
+        <div class="form-group">
+            <label for="musicName">Nome da Música:</label>
+            <input type="text" id="musicName" placeholder="Digite o nome da música">
+        </div>
+        
+        <div class="form-group">
+            <label for="artistName">Artista:</label>
+            <input type="text" id="artistName" placeholder="Digite o nome do artista">
+        </div>
+        
+        <button id="addBtn">Adicionar à Playlist</button>
+        
+        <!-- Lista de músicas da playlist -->
+        <div class="playlist">
+            <h2>Sua Playlist</h2>
+            <ul id="musicList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Função principal que é executada quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos do DOM que vamos usar
+            const addBtn = document.getElementById('addBtn');
+            const musicNameInput = document.getElementById('musicName');
+            const artistNameInput = document.getElementById('artistName');
+            const musicList = document.getElementById('musicList');
+            
+            // Configura todos os EventListeners
+            function setupEventListeners() {
+                // EventListener para o botão de adicionar
+                addBtn.addEventListener('click', addMusicHandler);
+                
+                // EventListener para tecla Enter nos campos de input
+                musicNameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        artistNameInput.focus();
+                    }
+                });
+                
+                artistNameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addMusicHandler();
+                    }
+                });
+                
+                // EventListener para duplo clique nos itens da playlist
+                musicList.addEventListener('dblclick', function(e) {
+                    if (e.target.tagName === 'SPAN') {
+                        const listItem = e.target.closest('li');
+                        const index = Array.from(musicList.children).indexOf(listItem);
+                        editMusicItem(index);
+                    }
+                });
+            }
+            
+            // Handler para adicionar música
+            function addMusicHandler() {
+                // Pega os valores dos inputs
+                const musicName = musicNameInput.value.trim();
+                const artistName = artistNameInput.value.trim();
+                
+                // Verifica se os campos não estão vazios
+                if (musicName && artistName) {
+                    // Adiciona a música à playlist
+                    addMusicToPlaylist(musicName, artistName);
+                    
+                    // Limpa os campos do formulário
+                    musicNameInput.value = '';
+                    artistNameInput.value = '';
+                    
+                    // Coloca o foco de volta no campo do nome da música
+                    musicNameInput.focus();
+                } else {
+                    alert('Por favor, preencha ambos os campos!');
+                }
+            }
+            
+            // Função para adicionar uma música à playlist
+            function addMusicToPlaylist(musicName, artistName) {
+                // Pega a playlist atual do localStorage
+                let playlist = getPlaylistFromStorage();
+                
+                // Adiciona a nova música ao array
+                playlist.push({
+                    name: musicName,
+                    artist: artistName
+                });
+                
+                // Salva a playlist atualizada no localStorage
+                savePlaylistToStorage(playlist);
+                
+                // Atualiza a exibição da playlist na tela
+                displayPlaylist();
+            }
+            
+            // Função para editar um item da playlist
+            function editMusicItem(index) {
+                const playlist = getPlaylistFromStorage();
+                const music = playlist[index];
+                
+                const newName = prompt("Editar nome da música:", music.name);
+                if (newName === null) return;
+                
+                const newArtist = prompt("Editar artista:", music.artist);
+                if (newArtist === null) return;
+                
+                playlist[index] = {
+                    name: newName.trim(),
+                    artist: newArtist.trim()
+                };
+                
+                savePlaylistToStorage(playlist);
+                displayPlaylist();
+            }
+            
+            // Função para carregar a playlist do localStorage e exibir na tela
+            function loadPlaylist() {
+                displayPlaylist();
+            }
+            
+            // Função para exibir a playlist na tela
+            function displayPlaylist() {
+                // Pega a playlist do localStorage
+                const playlist = getPlaylistFromStorage();
+                
+                // Limpa a lista atual
+                musicList.innerHTML = '';
+                
+                // Se a playlist estiver vazia, exibe uma mensagem
+                if (playlist.length === 0) {
+                    const emptyItem = document.createElement('li');
+                    emptyItem.textContent = 'Sua playlist está vazia. Adicione algumas músicas!';
+                    musicList.appendChild(emptyItem);
+                    return;
+                }
+                
+                // Para cada música na playlist, cria um item na lista
+                playlist.forEach(function(music, index) {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'music-item';
+                    
+                    // Cria o texto com o nome da música e artista
+                    const musicText = document.createElement('span');
+                    musicText.textContent = `${music.name} - ${music.artist}`;
+                    
+                    // Cria o botão para remover a música
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Remover';
+                    deleteBtn.className = 'delete-btn';
+                    
+                    // Adiciona um evento de clique ao botão de remover
+                    deleteBtn.addEventListener('click', function() {
+                        if (confirm(`Tem certeza que deseja remover "${music.name}" da playlist?`)) {
+                            removeMusicFromPlaylist(index);
+                        }
+                    });
+                    
+                    // Adiciona os elementos ao item da lista
+                    listItem.appendChild(musicText);
+                    listItem.appendChild(deleteBtn);
+                    
+                    // Adiciona o item à lista
+                    musicList.appendChild(listItem);
+                });
+            }
+            
+            // Função para remover uma música da playlist
+            function removeMusicFromPlaylist(index) {
+                // Pega a playlist atual
+                let playlist = getPlaylistFromStorage();
+                
+                // Remove a música no índice especificado
+                playlist.splice(index, 1);
+                
+                // Salva a playlist atualizada
+                savePlaylistToStorage(playlist);
+                
+                // Atualiza a exibição
+                displayPlaylist();
+            }
+            
+            // Função auxiliar para pegar a playlist do localStorage
+            function getPlaylistFromStorage() {
+                // Pega os dados do localStorage (ou retorna um array vazio se não existir)
+                const playlistJSON = localStorage.getItem('playlist');
+                return playlistJSON ? JSON.parse(playlistJSON) : [];
+            }
+            
+            // Função auxiliar para salvar a playlist no localStorage
+            function savePlaylistToStorage(playlist) {
+                // Converte o array para JSON e salva no localStorage
+                localStorage.setItem('playlist', JSON.stringify(playlist));
+            }
+            
+            // Inicializa o sistema
+            setupEventListeners();
+            loadPlaylist();
+        });
+    </script>
+</body>
+</html>
