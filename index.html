@@ -92,6 +92,16 @@
         .delete-btn:hover {
             background-color: #ff5252;
         }
+
+        .music-info {
+            flex-grow: 1;
+        }
+
+        .music-date {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -182,10 +192,15 @@
                 // Pega a playlist atual do localStorage
                 let playlist = getPlaylistFromStorage();
                 
-                // Adiciona a nova música ao array
+                // Adiciona a nova música ao array com a data de inclusão
                 playlist.push({
                     name: musicName,
-                    artist: artistName
+                    artist: artistName,
+                    dateAdded: new Date().toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    })
                 });
                 
                 // Salva a playlist atualizada no localStorage
@@ -208,7 +223,8 @@
                 
                 playlist[index] = {
                     name: newName.trim(),
-                    artist: newArtist.trim()
+                    artist: newArtist.trim(),
+                    dateAdded: music.dateAdded // Mantém a mesma data de inclusão
                 };
                 
                 savePlaylistToStorage(playlist);
@@ -241,9 +257,22 @@
                     const listItem = document.createElement('li');
                     listItem.className = 'music-item';
                     
+                    // Cria um container para as informações da música
+                    const musicInfo = document.createElement('div');
+                    musicInfo.className = 'music-info';
+                    
                     // Cria o texto com o nome da música e artista
                     const musicText = document.createElement('span');
                     musicText.textContent = `${music.name} - ${music.artist}`;
+                    
+                    // Cria a data de inclusão
+                    const musicDate = document.createElement('span');
+                    musicDate.className = 'music-date';
+                    musicDate.textContent = `Adicionada em: ${music.dateAdded}`;
+                    
+                    // Adiciona os elementos ao container de informações
+                    musicInfo.appendChild(musicText);
+                    musicInfo.appendChild(musicDate);
                     
                     // Cria o botão para remover a música
                     const deleteBtn = document.createElement('button');
@@ -258,7 +287,7 @@
                     });
                     
                     // Adiciona os elementos ao item da lista
-                    listItem.appendChild(musicText);
+                    listItem.appendChild(musicInfo);
                     listItem.appendChild(deleteBtn);
                     
                     // Adiciona o item à lista
