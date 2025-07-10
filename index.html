@@ -67,7 +67,7 @@
         
         .playlist h2 {
             color: #6a3093; /* Roxo */
-            border-bottom: 2px solid #48d1cc; /* Turquesa */
+            border-bottom: 2px solid #2fa19c; /* Turquesa */
             padding-bottom: 5px;
         }
         
@@ -105,6 +105,9 @@
     </style>
 </head>
 <body>
+    <button id="botaoclick">Contador Clique</button>
+    <button id="menosbotao">Descontador</button>
+    <p> cliques <span id="contador">0</span></p>
     <div class="container">
         <h1>Minha Playlist</h1>
         
@@ -136,6 +139,7 @@
             const musicNameInput = document.getElementById('musicName');
             const artistNameInput = document.getElementById('artistName');
             const musicList = document.getElementById('musicList');
+            const bottomModo  document.getElementById('bottomModo');
             
             // Configura todos os EventListeners
             function setupEventListeners() {
@@ -322,7 +326,27 @@
                 // Converte o array para JSON e salva no localStorage
                 localStorage.setItem('playlist', JSON.stringify(playlist));
             }
-            
+
+            //botao contador
+            /*let bottomModo = parseInt (localStorage.getItem('contador-clique')) 
+            if 
+
+            bottomModo.getItem =
+            */
+           document.getElementById('botaoClick').addEventListener('contador', function) {
+            let botao = localStorage.getItem('contador') || 0;
+            botao = parseInt ('contador') + 1;
+            localStorage.setItem('contador', botao);
+            document.getElementById('contador').textContent = botao;
+           };
+
+           document.getElementById('Descontador').addEventListener('contador', function) {
+                let botao = localStorage.getItem('contador') || 0;
+                botao = parseInt('contador') - 1;
+                localStorage.setItem('contador', botao);
+                document.getElementById('contador').textContent = botao;
+            };
+           
             // Inicializa o sistema
             setupEventListeners();
             loadPlaylist();
